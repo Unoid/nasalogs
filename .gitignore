@@ -2,5 +2,5 @@
 .classpath
 .project
 target
-nasalogs*
+nasalogs.db*
 report*
