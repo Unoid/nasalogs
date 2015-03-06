@@ -19,19 +19,19 @@ import kiblerdude.nasalogs.services.Database;
 public class PopularityDAO {
 
 	private static final String SQL_TOP_10_POPULAR_PAGES_BETWEEN_TIMES = 
-			"select date(date), endpoint, count(*) as count " +
+			"select dayofmonth(date), endpoint, count(*) AS amount " +
 			"from logs " +
 			"where page = true and dayofmonth(date) = ? and hour(date) BETWEEN ? AND ? " +
-			"group by endpoint " +
-			"order by count desc " +
+			"group by dayofmonth(date), endpoint " +
+			"order by amount desc " +
 			"limit 10";	
 	
 	private static final String SQL_TOP_10_POPULAR_PAGES_FOR_JULY = 
-			"select endpoint, count(*) as count " +
+			"select endpoint, count(*) as amount " +
 			"from logs " +
 			"where page = true " +
 			"group by endpoint " +
-			"order by count desc " +
+			"order by amount desc " +
 			"limit 10";
 	
 	private final Database database;

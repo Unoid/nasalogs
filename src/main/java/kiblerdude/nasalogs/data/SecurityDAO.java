@@ -21,11 +21,11 @@ public class SecurityDAO {
 	private final CsvGenerator csv;
 	
 	private static final String SQL_400_RESPONSES_BY_HOST = 
-			"select host, count(response) as count " +
+			"select host, count(response) as amount " +
 			"from logs " +
 			"where response >= 400 AND response < 500 " +
 			"group by host " +
-			"order by count desc";
+			"order by amount desc";
 	
 	private static final String SQL_400_RESPONSES_UNIQUE_URLS = 
 			"select distinct(endpoint) " +
@@ -33,9 +33,9 @@ public class SecurityDAO {
 			"where response >= 400 AND response < 500 " +
 			"order by endpoint";
 	
-	private static final String SQL_RESPONSES_BY_URL_BY_DAY = "select date(date) as day, endpoint, response, count(*) as count " +
+	private static final String SQL_RESPONSES_BY_URL_BY_DAY = "select dayofmonth(date), endpoint, response, count(*) as amount " +
 			"from logs " +
-			"group by dayofmonth(day), endpoint, response";	
+			"group by dayofmonth(date), endpoint, response";	
 	
 	public SecurityDAO(final Database database, final CsvGenerator csv) {
 		this.database = database;	

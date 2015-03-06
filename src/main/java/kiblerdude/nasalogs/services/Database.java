@@ -22,7 +22,7 @@ public class Database {
 	private static final String SQL_DROP_TABLE = "DROP TABLE IF EXISTS logs";
 	
 	private static final String SQL_CREATE_TABLE =
-			"CREATE CACHED TABLE logs (" +
+			"CREATE TABLE logs (" +
 			"id INT NOT NULL," +
 			"host VARCHAR(64) NULL," +
 			"date DATETIME NULL," +

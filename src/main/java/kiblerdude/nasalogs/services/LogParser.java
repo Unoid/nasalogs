@@ -87,7 +87,6 @@ public class LogParser {
 				count++;
 				if (count % 25000 == 0) {
 					System.out.print(".");
-					break;
 				}
 			}
 			
