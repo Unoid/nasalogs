@@ -22,10 +22,11 @@ public class Database {
 	private static final String SQL_DROP_TABLE = "DROP TABLE IF EXISTS logs";
 	
 	private static final String SQL_CREATE_TABLE =
-			"CREATE TABLE logs (" +
+			"CREATE CACHED TABLE logs (" +
 			"id INT NOT NULL," +
 			"host VARCHAR(64) NULL," +
 			"date DATETIME NULL," +
+			//"date TIMESTAMP NULL," +
 			"endpoint VARCHAR(256) NULL," +
 			"response INT NULL," +
 			"page BOOLEAN NULL," +
@@ -44,9 +45,9 @@ public class Database {
 	 */
 	public void start() throws Exception {
 		server.setProperties(properties);
-		//server.start();
-		//connection = DriverManager.getConnection("jdbc:hsqldb:file:./nasalogs.db", "sa", "");
-		connection = DriverManager.getConnection("jdbc:mysql://localhost/nasalogs?user=test&password=test");
+		server.start();
+		connection = DriverManager.getConnection("jdbc:hsqldb:file:./nasalogs.db", "sa", "");
+		//connection = DriverManager.getConnection("jdbc:mysql://localhost/nasalogs?user=test&password=test");
 		
 		// drop the table (if it exists)
 		PreparedStatement delete = connection.prepareStatement(SQL_DROP_TABLE);
@@ -65,7 +66,7 @@ public class Database {
 	 */
 	public void stop() throws Exception {
 		connection.close();
-		//server.stop();
+		server.stop();
 	}
 	
 	/**
