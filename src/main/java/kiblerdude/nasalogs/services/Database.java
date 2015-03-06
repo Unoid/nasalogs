@@ -25,7 +25,7 @@ public class Database {
 			"CREATE TABLE logs (" +
 			"id INT NOT NULL," +
 			"host VARCHAR(64) NULL," +
-			"date DATE NULL," +
+			"date DATETIME NULL," +
 			"endpoint VARCHAR(256) NULL," +
 			"response INT NULL," +
 			"page BOOLEAN NULL," +

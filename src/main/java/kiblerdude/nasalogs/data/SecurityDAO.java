@@ -35,7 +35,6 @@ public class SecurityDAO {
 	
 	private static final String SQL_RESPONSES_BY_URL_BY_DAY = "select date(date) as day, endpoint, response, count(*) as count " +
 			"from logs " +
-			//"where response in (200, 400, 500) " +
 			"group by dayofmonth(day), endpoint, response";	
 	
 	public SecurityDAO(final Database database, final CsvGenerator csv) {
@@ -82,7 +81,7 @@ public class SecurityDAO {
 		Connection connection = database.getConnection();
 		try (PreparedStatement stmt = connection.prepareStatement(query);
 			 ResultSet rs = stmt.executeQuery()) {
-			csv.generateCsv(filename, rs);
+			csv.generateCsv(filename, false, rs);
 			return true;
 		}		
 	}

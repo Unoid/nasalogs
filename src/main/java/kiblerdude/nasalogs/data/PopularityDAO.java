@@ -5,14 +5,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.TimeZone;
 
 import kiblerdude.nasalogs.services.CsvGenerator;
 import kiblerdude.nasalogs.services.Database;
@@ -24,15 +17,14 @@ import kiblerdude.nasalogs.services.Database;
  *
  */
 public class PopularityDAO {
-	
-	//BETWEEN '1995-07-01 08:00:00' AND '1995-07-01 10:00:00'
+
 	private static final String SQL_TOP_10_POPULAR_PAGES_BETWEEN_TIMES = 
-			"select dayofmonth(date), endpoint, count(*) as count " +
+			"select date(date), endpoint, count(*) as count " +
 			"from logs " +
-			"where page = true and date BETWEEN ? AND ? " +
+			"where page = true and dayofmonth(date) = ? and hour(date) BETWEEN ? AND ? " +
 			"group by endpoint " +
 			"order by count desc " +
-			"limit 10";
+			"limit 10";	
 	
 	private static final String SQL_TOP_10_POPULAR_PAGES_FOR_JULY = 
 			"select endpoint, count(*) as count " +
@@ -59,9 +51,7 @@ public class PopularityDAO {
 	 */	
 	public boolean generatePopularPagesBetween0And8() throws SQLException, IOException, ParseException {
 		System.out.println("Generating report for top between 0 and 8");
-		Timestamp startTime = getTimestamp("1995-07-01 00:00:00");
-		Timestamp stopTime = getTimestamp("1995-07-01 08:00:00");
-		return generatePopularPagesBetween("report_top_10_pages_between_0000_and_0800.csv", startTime, stopTime);
+		return generatePopularPagesBetween("report_top_10_pages_between_0000_and_0800.csv", 0, 8);
 	}
 	
 	/**
@@ -73,9 +63,7 @@ public class PopularityDAO {
 	 */	
 	public boolean generatePopularPagesBetween8And10() throws SQLException, IOException, ParseException {
 		System.out.println("Generating report for top between 8 and 10");
-		Timestamp startTime = getTimestamp("1995-07-01 08:00:00");
-		Timestamp stopTime = getTimestamp("1995-07-01 10:00:00");
-		return generatePopularPagesBetween("report_top_10_pages_between_0800_and_1000.csv", startTime, stopTime);
+		return generatePopularPagesBetween("report_top_10_pages_between_0800_and_1000.csv", 8, 10);
 	}
 	
 	/**
@@ -94,41 +82,29 @@ public class PopularityDAO {
 		Connection connection = database.getConnection();
 		try (PreparedStatement stmt = connection.prepareStatement(query);
 			 ResultSet rs = stmt.executeQuery()) {
-			csv.generateCsv(filename, rs);
+			csv.generateCsv(filename, false, rs);
 			return true;
 		}		
 	}
 	
-	private boolean generatePopularPagesBetween(String filename, Timestamp startTime, Timestamp stopTime) throws SQLException, IOException, ParseException {
+	private boolean generatePopularPagesBetween(String filename, int startHour, int stopHour) throws SQLException, IOException, ParseException {
 		Connection connection = database.getConnection();
-		Calendar start = Calendar.getInstance(TimeZone.getTimeZone("EST"));
-		start.setTime(startTime);
-		Calendar stop =  Calendar.getInstance(TimeZone.getTimeZone("EST"));
-		stop.setTime(stopTime);
 		
 		// query for each day of the month
-		for (int day = 1; day < 3; day++) {
+		for (int day = 1; day < 32; day++) {
 			try (PreparedStatement stmt = connection.prepareStatement(SQL_TOP_10_POPULAR_PAGES_BETWEEN_TIMES)) {
 				System.out.println("querying for day " + day);
-				start.set(Calendar.DAY_OF_MONTH, day);
-				stop.set(Calendar.DAY_OF_MONTH, day);
 				
-				stmt.setTimestamp(1, new Timestamp(start.getTime().getTime()));
-				stmt.setTimestamp(2, new Timestamp(stop.getTime().getTime()));
+				stmt.setInt(1, day);
+				stmt.setInt(2, startHour);
+				stmt.setInt(3, stopHour);
 				
 				ResultSet rs = stmt.executeQuery();
-				csv.generateCsv(filename, rs);
+				csv.generateCsv(filename, day > 1, rs);
 				rs.close();
 			}			
 		}
 		
 		return true;
 	}
-
-	private Timestamp getTimestamp(String input) throws ParseException {
-		SimpleDateFormat format = new SimpleDateFormat("YYYY-MM-dd HH:mm:ss");
-		format.setTimeZone(TimeZone.getTimeZone("EST"));
-		Date date = format.parse(input);
-		return new Timestamp(date.getTime());
-	}	
 }
