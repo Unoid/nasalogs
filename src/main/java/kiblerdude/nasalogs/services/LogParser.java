@@ -57,23 +57,22 @@ public class LogParser {
 			while ((log = in.readLine()) != null) {
 				String[] columns = log.replaceAll("\"", "").split("\\s+");
 				
+				// TODO this is ugly - is there a better way to do this?
 				if (columns.length >= 8) {
-					String method = columns[5];
 					String host = columns[0];
 					String dateStr = columns[3].replace("[", "");
 					String endpoint = columns[6];
 					Integer responseCode = Integer.parseInt(columns[columns.length - 2]);
 					
+					// parse the request log date and convert it to a timestamp for the database
 					SimpleDateFormat format = new SimpleDateFormat("dd/MMM/yyyy:HH:mm:ss");
 					format.setTimeZone(TimeZone.getTimeZone("EST"));
 					Date date = format.parse(dateStr);
 					Timestamp timestamp = new Timestamp(date.getTime());
 					Boolean page = isPage(endpoint);
 					
-					if ("GET".equals(method)) {
-						LogEntry entry = new LogEntry(host, timestamp, endpoint, responseCode, page);
-						batch.add(entry);
-					}
+					LogEntry entry = new LogEntry(host, timestamp, endpoint, responseCode, page);
+					batch.add(entry);
 					
 					if (batch.size() == BATCH_SIZE) {
 						dao.storeLogEntries(batch);
@@ -81,10 +80,14 @@ public class LogParser {
 					}
 					
 				} else {
+					// this happens when something is weird about the line in the request logs.
+					// lets just take a note of it
 					problems.add(log);
 					errors++;
 				}
 				count++;
+				
+				// so we can see some progress
 				if (count % 25000 == 0) {
 					System.out.print(".");
 				}
